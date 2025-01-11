@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Froala Editor with Dark Mode</title>
+  <!-- Froala Editor Styles -->
+  <link rel="stylesheet" href="froala_editor.pkgd.min.css">
+  <link rel="stylesheet" href="dark.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    #editor {
+      width: 100%;
+      min-height: 300px;
+    }
+
+    .controls {
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: #ffffff;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .dark-mode {
+      background-color: #121212;
+      color: #ffffff;
+    }
+
+
+
+    .dark-mode .fr-wrapper,
+    .dark-mode .froala-editor {
+      background-color: #1e1e1e !important;
+      color: #ffffff !important;
+    }
+
+    .fr-second-toolbar {
+      display: none;
+      position: absolute;
+    }
+
+    #gg {
+      position: absolute;
+      bottom: 2px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="controls">
+    <button id="toggleDarkMode">Toggle Dark Mode</button>
+    <button id="exportContent">Export Content</button>
+    <button id="importContent">Import Content</button>
+    <input type="file" id="fileInput" style="display: none;" accept=".txt" />
+  </div>
+
+  <div id="editor"></div>
+  <h6 id="gg">from froala make by Ammar chacal</h6>
+  <!-- Froala Editor JS -->
+  <script src="froala_editor.pkgd.min.js"></script>
+  <script>
+    let isDarkMode = localStorage.getItem('isDarkMode') === 'true'; // Check if dark mode is set in localStorage
+    const editorOptions = {
+      theme: isDarkMode ? 'dark' : 'default', // Use saved theme
+      toolbarInline: false,
+      charCounterCount: true, // Enables footer character counter
+      placeholderText: 'Start typing here...',
+      events: {
+        'contentChanged': function () {
+          // Automatically save content to localStorage on change
+          const content = this.html.get();
+          localStorage.setItem('editorContent', content);
+        }
+      }
+    };
+
+    // Initialize Froala Editor
+    let editorInstance = new FroalaEditor('#editor', editorOptions);
+
+    // Load saved content from localStorage
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedContent = localStorage.getItem('editorContent');
+      if (savedContent) {
+        editorInstance.html.set(savedContent);
+      }
+
+      // Apply saved dark mode preference
+      if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+      }
+    });
+
+    // Toggle Dark Mode
+    document.getElementById('toggleDarkMode').addEventListener('click', () => {
+      // Toggle dark mode
+      isDarkMode = !isDarkMode;
+      const newTheme = isDarkMode ? 'dark' : 'default';
+
+      // Apply dark mode to body
+      document.body.classList.toggle('dark-mode', isDarkMode);
+
+      // Update editor theme and reinitialize
+      editorOptions.theme = newTheme;
+      editorInstance.destroy();
+      editorInstance = new FroalaEditor('#editor', editorOptions);
+
+      // Store dark mode preference in localStorage
+      localStorage.setItem('isDarkMode', isDarkMode.toString());
+
+      // Apply styles to the editor's writing area and footer
+      const editorWrapper = document.querySelector('.fr-wrapper');
+      const editorCounter = document.querySelector('.fr-counter');
+      if (isDarkMode) {
+        editorWrapper.style.backgroundColor = '#121212';
+        editorWrapper.style.color = '#ffffff';
+        if (editorCounter) {
+          editorCounter.style.color = '#ffffff';
+        }
+      } else {
+        editorWrapper.style.backgroundColor = '#ffffff';
+        editorWrapper.style.color = '#000000';
+        if (editorCounter) {
+          editorCounter.style.color = '#000000';
+        }
+      }
+    });
+
+    // Export Content
+    document.getElementById('exportContent').addEventListener('click', () => {
+      const content = editorInstance.html.get();
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'editor-content.txt';
+      a.click();
+
+      URL.revokeObjectURL(url);
+    });
+
+    // Import Content
+    document.getElementById('importContent').addEventListener('click', () => {
+      document.getElementById('fileInput').click();
+    });
+
+    document.getElementById('fileInput').addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          editorInstance.html.set(e.target.result);
+        };
+        reader.readAsText(file);
+      }
+    });
+  </script>
+</body>
+
+</html>
