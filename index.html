@@ -2,178 +2,226 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Froala Editor with Dark Mode</title>
-  <!-- Froala Editor Styles -->
-  <link rel="stylesheet" href="froala_editor.pkgd.min.css">
-  <link rel="stylesheet" href="dark.min.css">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      transition: background-color 0.3s, color 0.3s;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Froala Dark++ editor</title>
+    <!-- Froala Editor CSS (Local Files) -->
+    <link rel="stylesheet" href="froala_editor.pkgd.min.css">
+    <link rel="stylesheet" href="froala_editor.min.css">
+    <link rel="stylesheet" href="dark.min.css">
+    <!-- Add Fonts -->
+    <style>
+        @import url('css2.css');
 
-    #editor {
-      width: 100%;
-      min-height: 300px;
-    }
+        @font-face {
+            font-family: 'Cairo';
+            src: url('path/to/cairo.woff2') format('woff2'),
+                url('path/to/cairo.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
 
-    .controls {
-      margin-bottom: 15px;
-      text-align: center;
-    }
+        @font-face {
+            font-family: 'Alexandria';
+            src: url('path/to/Alexandria.woff2') format('woff2'),
+                url('path/to/Alexandria.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
 
-    button {
-      padding: 10px 20px;
-      margin: 5px;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-      font-size: 16px;
-      background-color: #007bff;
-      color: #ffffff;
-    }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #121212;
+            /* Always dark background */
+            color: #ffffff;
+            /* Always light text */
+        }
 
-    button:hover {
-      background-color: #0056b3;
-    }
+        #editor {
+            width: 100%;
+            min-height: 300px;
+        }
 
-    .dark-mode {
-      background-color: #121212;
-      color: #ffffff;
-    }
+        .controls {
+            margin-bottom: 15px;
+            text-align: center;
+        }
 
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #ffffff;
+        }
 
+        button:hover {
+            background-color: #0056b3;
+        }
 
-    .dark-mode .fr-wrapper,
-    .dark-mode .froala-editor {
-      background-color: #1e1e1e !important;
-      color: #ffffff !important;
-    }
+        /* Ensure editor and toolbar are always in dark mode */
+        .fr-wrapper,
+        .froala-editor,
+        .fr-toolbar {
+            background-color: #1e1e1e !important;
+            color: #ffffff !important;
+        }
 
-    .fr-second-toolbar {
-      display: none;
-      position: absolute;
-    }
+        .fr-view {
+            color: #ffffff !important;
+            /* Ensure text is white in dark mode */
+            font-family: 'Cairo', sans-serif;
+            /* Default font for content */
+        }
 
-    #gg {
-      position: absolute;
-      bottom: 2px;
-    }
-  </style>
+        .fr-second-toolbar {
+            background-color: #121212;
+        }
+
+        /* Ensure the second toolbar is in dark mode */
+        .fr-second-toolbar {
+            background-color: #1e1e1e !important;
+            /* Dark background */
+            color: #ffffff !important;
+            /* Light text */
+            border-color: #333333 !important;
+            /* Dark border */
+        }
+
+        /* Style buttons and dropdowns in the second toolbar */
+        .fr-second-toolbar .fr-btn {
+            color: #ffffff !important;
+            /* Light text for buttons */
+            background-color: transparent !important;
+            /* Transparent background */
+            border-color: #333333 !important;
+            /* Dark border */
+        }
+
+        .fr-second-toolbar .fr-btn:hover {
+            background-color: #333333 !important;
+            /* Darker background on hover */
+        }
+
+        /* Style dropdown menus in the second toolbar */
+        .fr-second-toolbar .fr-dropdown-menu {
+            background-color: #1e1e1e !important;
+            /* Dark background */
+            border-color: #333333 !important;
+            /* Dark border */
+        }
+
+        .fr-second-toolbar .fr-dropdown-menu .fr-command {
+            color: #ffffff !important;
+            /* Light text for dropdown items */
+        }
+
+        .fr-second-toolbar .fr-dropdown-menu .fr-command:hover {
+            background-color: #333333 !important;
+            /* Darker background on hover */
+        }
+
+        #gg {
+            position: absolute;
+            margin-top: 20px;
+            font-size: 12px;
+            bottom: 2px;
+
+        }
+    </style>
 </head>
 
 <body>
-  <div class="controls">
-    <button id="toggleDarkMode">Toggle Dark Mode</button>
-    <button id="exportContent">Export Content</button>
-    <button id="importContent">Import Content</button>
-    <input type="file" id="fileInput" style="display: none;" accept=".txt" />
-  </div>
+    <div class="controls">
+        <button id="exportContent">Export Content</button>
+        <button id="importContent">Import Content</button>
+        <input type="file" id="fileInput" style="display: none;" accept=".txt, .md" />
+    </div>
 
-  <div id="editor"></div>
-  <h6 id="gg">from froala make by Ammar chacal</h6>
-  <!-- Froala Editor JS -->
-  <script src="froala_editor.pkgd.min.js"></script>
-  <script>
-    let isDarkMode = localStorage.getItem('isDarkMode') === 'true'; // Check if dark mode is set in localStorage
-    const editorOptions = {
-      theme: isDarkMode ? 'dark' : 'default', // Use saved theme
-      toolbarInline: false,
-      charCounterCount: true, // Enables footer character counter
-      placeholderText: 'Start typing here...',
-      events: {
-        'contentChanged': function () {
-          // Automatically save content to localStorage on change
-          const content = this.html.get();
-          localStorage.setItem('editorContent', content);
-        }
-      }
-    };
+    <div id="editor"></div>
+    <h6 id="gg">Modified Froala Editor for Dark Mode++ by Ammar Chacal</h6>
 
-    // Initialize Froala Editor
-    let editorInstance = new FroalaEditor('#editor', editorOptions);
-
-    // Load saved content from localStorage
-    document.addEventListener('DOMContentLoaded', () => {
-      const savedContent = localStorage.getItem('editorContent');
-      if (savedContent) {
-        editorInstance.html.set(savedContent);
-      }
-
-      // Apply saved dark mode preference
-      if (isDarkMode) {
-        document.body.classList.add('dark-mode');
-      }
-    });
-
-    // Toggle Dark Mode
-    document.getElementById('toggleDarkMode').addEventListener('click', () => {
-      // Toggle dark mode
-      isDarkMode = !isDarkMode;
-      const newTheme = isDarkMode ? 'dark' : 'default';
-
-      // Apply dark mode to body
-      document.body.classList.toggle('dark-mode', isDarkMode);
-
-      // Update editor theme and reinitialize
-      editorOptions.theme = newTheme;
-      editorInstance.destroy();
-      editorInstance = new FroalaEditor('#editor', editorOptions);
-
-      // Store dark mode preference in localStorage
-      localStorage.setItem('isDarkMode', isDarkMode.toString());
-
-      // Apply styles to the editor's writing area and footer
-      const editorWrapper = document.querySelector('.fr-wrapper');
-      const editorCounter = document.querySelector('.fr-counter');
-      if (isDarkMode) {
-        editorWrapper.style.backgroundColor = '#121212';
-        editorWrapper.style.color = '#ffffff';
-        if (editorCounter) {
-          editorCounter.style.color = '#ffffff';
-        }
-      } else {
-        editorWrapper.style.backgroundColor = '#ffffff';
-        editorWrapper.style.color = '#000000';
-        if (editorCounter) {
-          editorCounter.style.color = '#000000';
-        }
-      }
-    });
-
-    // Export Content
-    document.getElementById('exportContent').addEventListener('click', () => {
-      const content = editorInstance.html.get();
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'editor-content.txt';
-      a.click();
-
-      URL.revokeObjectURL(url);
-    });
-
-    // Import Content
-    document.getElementById('importContent').addEventListener('click', () => {
-      document.getElementById('fileInput').click();
-    });
-
-    document.getElementById('fileInput').addEventListener('change', (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          editorInstance.html.set(e.target.result);
+    <!-- Froala Editor JS (Local File) -->
+    <script src="froala_editor.pkgd.min.js"></script>
+    <!-- Updated Export Content Button Script -->
+    <script>
+        const editorOptions = {
+            theme: 'dark', // Always dark mode
+            toolbarInline: false,
+            charCounterCount: true,
+            placeholderText: 'Start typing here...',
+            events: {
+                'contentChanged': function () {
+                    const content = this.html.get();
+                    localStorage.setItem('editorContent', content);
+                }
+            },
+            // Add fonts to the font family dropdown
+            fontFamily: {
+                'Cairo, sans-serif': 'Cairo',
+                'Alexandria, sans-serif': 'Alexandria',
+                'Roboto, sans-serif': 'Roboto',
+                'Open Sans, sans-serif': 'Open Sans',
+                'Montserrat, sans-serif': 'Montserrat',
+                'Courier New, monospace': 'Courier New', // Existing monospace
+                'monospace, monospace': 'Monospace',    // New monospace option
+                'Arial, sans-serif': 'Arial',
+                'Times New Roman, serif': 'Times New Roman'
+            }
         };
-        reader.readAsText(file);
-      }
-    });
-  </script>
+
+        let editorInstance = new FroalaEditor('#editor', editorOptions);
+
+        // Load saved content from localStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedContent = localStorage.getItem('editorContent');
+            if (savedContent) {
+                editorInstance.html.set(savedContent);
+            }
+        });
+
+        // Updated Export Content with Renaming
+        document.getElementById('exportContent').addEventListener('click', () => {
+            const content = editorInstance.html.get();
+
+            // Prompt user for file name
+            const fileName = prompt('Enter a name for the file (without extension):', 'content');
+
+            if (fileName) {
+                const blob = new Blob([content], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${fileName}.md`; // Use the user-defined file name
+                a.click();
+                URL.revokeObjectURL(url);
+            } else {
+                alert('File name is required to export the content.');
+            }
+        });
+
+        // Import Content
+        document.getElementById('importContent').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const content = e.target.result;
+                    editorInstance.html.set(content);
+                };
+                reader.readAsText(file);
+            }
+        });
+    </script>
+
 </body>
 
 </html>
